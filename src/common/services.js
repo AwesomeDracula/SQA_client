@@ -1,10 +1,13 @@
-let baseUrl = 'https://sqa-be.herokuapp.com'
+import { getToken } from "./utils"
+
+// let baseUrl = 'https://sqa-be.herokuapp.com'
+let baseUrl = 'http://localhost:8080'
 
 const createFetcher = async (url, options) => {
   const urler = baseUrl + url
   const response = await fetch(urler, {
     headers: {
-      //'Authorization': 'Bearer ' + getToken(),
+      'Authorization': url === '/login' ? undefined : 'Bearer ' + getToken(),
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
@@ -12,14 +15,14 @@ const createFetcher = async (url, options) => {
   })
   const body = await response.json()
 
-  if (!response.ok) {
-    const error = new Error(body.error.message)
+  // if (!response.ok) {
+  //   const error = new Error(body.error.message)
 
-    error.info = body
-    error.status = response.status
+  //   error.info = body
+  //   error.status = response.status
 
-    throw error
-  }
+  //   throw error
+  // }
 
   return body
 }

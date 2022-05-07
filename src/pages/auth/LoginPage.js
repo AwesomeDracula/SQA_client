@@ -15,14 +15,14 @@ const LoginPage = (props) => {
   return (
     <>
       <Formik
-        initialValues={{insuranceCode: "", password: ""}}
+        initialValues={{username: "", password: ""}}
         validate={(values) => {
           const errors = {};
-          if (!values.insuranceCode) {
-            errors.insuranceCode = "Required";
+          if (!values.username) {
+            errors.username = "Vui lòng nhập trường này";
           }
           if (!values.password) {
-            errors.password = "Required";
+            errors.password = "Vui lòng nhập trường này";
           } else if (values.password.length < 8) {
             errors.password = "Password must not be longer than 8 characters";
           }
@@ -31,11 +31,15 @@ const LoginPage = (props) => {
         onSubmit={(values, {setSubmitting}) => {
           poster("/login", values)
             .then((data) => {
-              addToken(data.token);
-              navigate("/");
+              if (data.token) {
+                addToken(data.token);
+                navigate("/");
+              } else {
+                alert("Lỗi! Hãy thử lại!");
+              }
             })
             .catch((err) => {
-              alert("Login failed! Please try again!");
+              alert("Lỗi đăng nhập! Hãy thử lại!");
             })
             .finally(() => {
               setSubmitting(false);
@@ -53,36 +57,36 @@ const LoginPage = (props) => {
         }) => (
           <form onSubmit={handleSubmit} className="login-form">
             <div className="d-flex align-items-center my-4">
-              <h1 className="text-center fw-normal mb-0 me-3">Sign In</h1>
+              <h1 className="text-center fw-normal mb-0 me-3">Đăng nhập</h1>
             </div>
             {/* <!-- Email input --> */}
             <div className="form-outline mb-4">
               <label className="form-label" htmlFor="form3Example3">
-                Insurance Code
+                Tên đăng nhập
               </label>
               <input
                 type="text"
                 className="form-control form-control-lg"
-                placeholder="Enter insurance code"
-                name="insuranceCode"
+                placeholder="Nhập tên người dùng"
+                name="username"
                 onChange={handleChange}
                 onBlur={handleBlur}
-                value={values.insuranceCode}
+                value={values.username}
               />
               <span style={{color: "red", fontSize: "12px"}}>
-                {errors.insuranceCode && touched.insuranceCode && errors.insuranceCode}
+                {errors.username && touched.username && errors.username}
               </span>
             </div>
 
             {/* <!-- Password input --> */}
             <div className="form-outline mb-3">
               <label className="form-label" htmlFor="form3Example4">
-                Password
+                Mật khẩu
               </label>
               <input
                 type="password"
                 className="form-control form-control-lg"
-                placeholder="Enter password"
+                placeholder="Nhập mật khẩu"
                 name="password"
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -97,15 +101,15 @@ const LoginPage = (props) => {
               <Button
                 className="btn btn-primary btn-lg"
                 style={{width: "50%", margin: "auto"}}
-                disabled={isSubmitting || errors.insuranceCode || errors.password}
+                disabled={isSubmitting || errors.username || errors.password}
                 type="submit"
               >
-                Login
+                Đăng nhập
               </Button>
               <p className="small fw-bold mt-2 pt-1 mb-0">
-                Don't have an account?{" "}
+                Chưa có tài khoản?{" "}
                 <a href="register" className="link-danger">
-                  Register
+                  Đăng ký
                 </a>
               </p>
             </div>
