@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Tab, Tabs} from "react-bootstrap";
 import {getter} from "../common/services";
+import InsuranceConfig from "./InsuranceConfig";
 import SingleTab from "./SingleTab";
 
 function TabsComponent() {
@@ -34,11 +35,11 @@ function TabsComponent() {
       onSelect={(k) => setKey(k)}
       className="mb-3"
     >
-      <Tab eventKey="home" title="BHXH bắt buộc">
+      <Tab eventKey="home" title="BHXH">
         <SingleTab incomes={incomes} />
       </Tab>
-      <Tab eventKey="profile" title="BHXH tự nguyện">
-        <SingleTab incomes={incomes} />
+      <Tab eventKey="profile" title="Mức đóng BHXH">
+        <InsuranceConfig />
       </Tab>
     </Tabs>
   );

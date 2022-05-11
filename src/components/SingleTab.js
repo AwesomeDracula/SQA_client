@@ -1,8 +1,11 @@
 import React, {useEffect, useState} from "react";
-import {Button} from "react-bootstrap";
+import {Button, Table} from "react-bootstrap";
 import DatePicker from "react-datepicker";
+import {format} from "date-fns";
 
 import "react-datepicker/dist/react-datepicker.css";
+import {lastDayOfMonth} from "date-fns";
+import {getter, poster} from "../common/services";
 
 const initialValues = {
   startTime: null,
@@ -14,6 +17,7 @@ const initialValues = {
 const SingleTab = ({incomes}) => {
   const [listData, setListData] = useState([]);
   const [editing, setEditing] = useState(false);
+  const [calculatedData, setCalculatedData] = useState(null);
 
   useEffect(() => {
     setListData(incomes);
@@ -37,7 +41,11 @@ const SingleTab = ({incomes}) => {
     setListData(newListData);
   };
 
-  const onCalculate = () => {};
+  const onCalculate = () => {
+    getter("/calculate-insurance-fee")
+      .then((data) => setCalculatedData(data))
+      .catch((error) => {});
+  };
 
   const onSave = () => {
     for (const element of listData) {
@@ -57,6 +65,35 @@ const SingleTab = ({incomes}) => {
         return;
       }
     }
+    const transferedListData = listData
+      .filter((data) => !data.isOld)
+      .map((el) => {
+        return {
+          income: el.income,
+          startTime: new Date(format(el.startTime, "yyyy-MM") + "-01"),
+          endTime: new Date(
+            format(lastDayOfMonth(new Date(el.endTime)), "yyyy-MM-dd")
+          ),
+        };
+      });
+    poster("/declare-income", {
+      incomes: transferedListData,
+    })
+      .then(() => {
+        alert("Thêm thành công!");
+        const newList = listData.map((el) => {
+          return {
+            ...el,
+            isOld: true,
+          };
+        });
+        setListData(newList);
+        setEditing(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        alert("Lỗi! Hãy thử lại!");
+      });
   };
 
   return (
@@ -97,13 +134,17 @@ const SingleTab = ({incomes}) => {
                 className="form-control form-control-lg"
               />
             </div>
-            <Button
-              onClick={removeItem}
-              className="align-self-end btn btn-danger"
-              style={{width: "50px", height: "50px"}}
-            >
-              <i class="fa fa-trash" aria-hidden="true"></i>
-            </Button>
+            {!item.isOld ? (
+              <Button
+                onClick={() => removeItem(index)}
+                className="align-self-end btn btn-danger"
+                style={{width: "50px", height: "50px"}}
+              >
+                <i class="fa fa-trash" aria-hidden="true"></i>
+              </Button>
+            ) : (
+              <div style={{width: "50px", height: "50px"}} />
+            )}
           </div>
         );
       })}
@@ -136,6 +177,35 @@ const SingleTab = ({incomes}) => {
           Tính
         </Button>
       </div>
+      {calculatedData && (
+        <div className="text-center mt-4 pt-2">
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th className="text-center">Từ</th>
+                <th className="text-center">Đến</th>
+                <th className="text-center">Phí bảo hiểm</th>
+              </tr>
+            </thead>
+            <tbody>
+              {calculatedData?.statistic.map((item, index) => {
+                return (
+                  <tr key={index}>
+                    <td>{format(new Date(item.startTime), "MM/yyyy")}</td>
+                    <td>{format(new Date(item.endTime), "MM/yyyy")}</td>
+                    <td>
+                      {new Intl.NumberFormat("vn-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(item.fee)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </Table>
+        </div>
+      )}
     </>
   );
 };

@@ -76,10 +76,10 @@ const ProfilePage = (props) => {
             };
             poster("/update-profile", params)
               .then((data) => {
-                alert("Success");
+                alert("Cập nhật thành công!");
               })
               .catch((err) => {
-                alert("Error");
+                alert("Lỗi! Hãy thử lại!");
               })
               .finally(() => {
                 setSubmitting(false);
